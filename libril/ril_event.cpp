@@ -126,7 +126,6 @@ static void removeFromList(struct ril_event * ev)
 {
     dlog("~~~~ Removing event ~~~~");
     dump_event(ev);
-
     ev->next->prev = ev->prev;
     ev->prev->next = ev->next;
     ev->next = NULL;
@@ -312,13 +311,27 @@ void ril_timer_add(struct ril_event * ev, struct timeval * tv)
     dlog("~~~~ -ril_timer_add ~~~~");
 }
 
+// Remove event from timer list
+void ril_timer_delete(struct ril_event *tev)
+{
+    dlog("~~~~timer event delete=%x",(unsigned int)tev);
+    removeFromList(tev);
+}
+
+// sends timer callback event pointer
+void* ril_timer_list()
+{
+    return &timer_list;
+}
+
 // Remove event from watch or timer list
 void ril_event_del(struct ril_event * ev)
 {
-    dlog("~~~~ +ril_event_del ~~~~");
+    dlog("~~~~ +ril_event_del event= %x ~~~~", (unsigned int)ev);
     MUTEX_ACQUIRE();
 
     if (ev->index < 0 || ev->index >= MAX_FD_EVENTS) {
+        MUTEX_RELEASE();
         return;
     }
 
